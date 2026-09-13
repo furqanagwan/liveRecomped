@@ -44,6 +44,7 @@ DiscInstallDialog::~DiscInstallDialog() {
 
 void DiscInstallDialog::OnDraw(ImGuiIO& io) {
   ImGuiGamepadBridge::FeedPrimaryController(io);
+  BeginInstallIfPicked();
   FinishInstallIfDone();
   if (stage_ == Stage::kInstalling && worker_succeeded_) {
     return;
@@ -76,11 +77,12 @@ void DiscInstallDialog::DrawChooseImage() {
   ImGui::SetNextItemWidth(-1.0f);
   ImGui::InputTextWithHint("##disc_image_path", "Path to .iso", typed_path_.data(), typed_path_.size());
 
-  if (NativeFilePicker::IsAvailable() && ImGui::Button("Browse", ImVec2(120.0f, 0.0f))) {
-    if (auto picked = file_picker_.PickDiscImage("Select your " + request_.game_display_name + " disc image")) {
-      BeginInstall(*picked);
-      return;
+  if (NativeFilePicker::IsAvailable()) {
+    ImGui::BeginDisabled(pending_pick_ != nullptr);
+    if (ImGui::Button("Browse", ImVec2(120.0f, 0.0f))) {
+      RequestPickedDiscImage();
     }
+    ImGui::EndDisabled();
   }
   ImGui::SameLine();
   if (ImGui::Button("Install", ImVec2(120.0f, 0.0f)) && typed_path_[0] != '\0') {
@@ -105,6 +107,35 @@ void DiscInstallDialog::DrawInstalling() {
   ImGui::ProgressBar(fraction, ImVec2(-1.0f, 0.0f), "");
   ImGui::Text("%s / %s", FormatGigabytes(copied).c_str(), FormatGigabytes(total).c_str());
   ImGui::TextDisabled("This only happens once.");
+}
+
+void DiscInstallDialog::RequestPickedDiscImage() {
+  auto pending_pick = std::make_shared<PendingPick>();
+  pending_pick_ = pending_pick;
+  file_picker_.PickDiscImage("Select your " + request_.game_display_name + " disc image",
+                             [pending_pick](std::optional<std::filesystem::path> disc_image) {
+                               std::lock_guard<std::mutex> lock(pending_pick->mutex);
+                               pending_pick->disc_image = std::move(disc_image);
+                               pending_pick->completed = true;
+                             });
+}
+
+void DiscInstallDialog::BeginInstallIfPicked() {
+  if (!pending_pick_) {
+    return;
+  }
+  std::optional<std::filesystem::path> disc_image;
+  {
+    std::lock_guard<std::mutex> lock(pending_pick_->mutex);
+    if (!pending_pick_->completed) {
+      return;
+    }
+    disc_image = std::move(pending_pick_->disc_image);
+  }
+  pending_pick_.reset();
+  if (disc_image && stage_ != Stage::kInstalling) {
+    BeginInstall(*disc_image);
+  }
 }
 
 void DiscInstallDialog::FinishInstallIfDone() {

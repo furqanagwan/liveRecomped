@@ -29,7 +29,11 @@ add_library(live_common STATIC
     src/ui/system_menu_dialog.cpp
 )
 
-if(WIN32)
+if(REXGLUE_PLATFORM_UWP)
+    target_sources(live_common PRIVATE src/platform/native_file_picker_uwp.cpp)
+    rexglue_uwp_cppwinrt_include_dir(live_cppwinrt_include_dir)
+    target_include_directories(live_common SYSTEM PRIVATE "${live_cppwinrt_include_dir}")
+elseif(WIN32)
     target_sources(live_common PRIVATE src/platform/native_file_picker_windows.cpp)
 else()
     target_sources(live_common PRIVATE src/platform/native_file_picker_unix.cpp)
@@ -47,7 +51,7 @@ endif()
 set(LIVE_GDK_ROOT "C:/Program Files (x86)/Microsoft GDK/260404/windows" CACHE PATH
     "Microsoft GDK windows folder containing include and lib/x64")
 
-if(WIN32 AND EXISTS "${LIVE_GDK_ROOT}/include/XGameRuntimeInit.h")
+if(WIN32 AND NOT REXGLUE_PLATFORM_UWP AND EXISTS "${LIVE_GDK_ROOT}/include/XGameRuntimeInit.h")
     message(STATUS "live_common: Microsoft GDK found at ${LIVE_GDK_ROOT}")
     target_compile_definitions(live_common PRIVATE LIVE_HAS_GDK)
     target_include_directories(live_common PRIVATE "${LIVE_GDK_ROOT}/include")

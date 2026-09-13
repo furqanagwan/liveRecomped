@@ -70,13 +70,14 @@ bool NativeFilePicker::IsAvailable() {
 #endif
 }
 
-std::optional<std::filesystem::path> NativeFilePicker::PickDiscImage(const std::string& title) const {
+void NativeFilePicker::PickDiscImage(const std::string& title, PickedHandler on_picked) const {
   for (const auto& command : PickerCommands(title)) {
     if (auto selected = RunAndReadFirstLine(command)) {
-      return std::filesystem::path(*selected);
+      on_picked(std::filesystem::path(*selected));
+      return;
     }
   }
-  return std::nullopt;
+  on_picked(std::nullopt);
 }
 
 }

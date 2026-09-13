@@ -1,8 +1,12 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <filesystem>
 #include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
 #include <string>
 #include <thread>
 
@@ -38,17 +42,26 @@ class DiscInstallDialog final : public rex::ui::ImGuiDialog {
  private:
   enum class Stage { kChoosingImage, kInstalling, kFailed };
 
+  struct PendingPick {
+    std::mutex mutex;
+    bool completed = false;
+    std::optional<std::filesystem::path> disc_image;
+  };
+
   DiscInstallDialog(rex::ui::ImGuiDrawer* drawer, rex::ui::WindowedAppContext& app_context,
                     DiscInstallRequest request);
 
   void DrawChooseImage();
   void DrawInstalling();
+  void RequestPickedDiscImage();
+  void BeginInstallIfPicked();
   void FinishInstallIfDone();
   void BeginInstall(const std::filesystem::path& disc_image);
 
   rex::ui::WindowedAppContext& app_context_;
   DiscInstallRequest request_;
   NativeFilePicker file_picker_;
+  std::shared_ptr<PendingPick> pending_pick_;
   Stage stage_ = Stage::kChoosingImage;
   std::array<char, 1024> typed_path_{};
   std::filesystem::path disc_image_;

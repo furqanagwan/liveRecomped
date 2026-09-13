@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -8,10 +9,12 @@ namespace live {
 
 class NativeFilePicker {
  public:
+  using PickedHandler = std::function<void(std::optional<std::filesystem::path>)>;
+
   explicit NativeFilePicker(void* owner_window) : owner_window_(owner_window) {}
 
   static bool IsAvailable();
-  std::optional<std::filesystem::path> PickDiscImage(const std::string& title) const;
+  void PickDiscImage(const std::string& title, PickedHandler on_picked) const;
 
  private:
   void* owner_window_;

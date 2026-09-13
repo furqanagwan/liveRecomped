@@ -12,7 +12,7 @@ bool NativeFilePicker::IsAvailable() {
   return true;
 }
 
-std::optional<std::filesystem::path> NativeFilePicker::PickDiscImage(const std::string& title) const {
+void NativeFilePicker::PickDiscImage(const std::string& title, PickedHandler on_picked) const {
   wchar_t selected[4096] = L"";
   std::wstring wide_title(title.begin(), title.end());
   OPENFILENAMEW dialog{};
@@ -24,9 +24,10 @@ std::optional<std::filesystem::path> NativeFilePicker::PickDiscImage(const std::
   dialog.lpstrTitle = wide_title.c_str();
   dialog.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
   if (!GetOpenFileNameW(&dialog)) {
-    return std::nullopt;
+    on_picked(std::nullopt);
+    return;
   }
-  return std::filesystem::path(selected);
+  on_picked(std::filesystem::path(selected));
 }
 
 }
