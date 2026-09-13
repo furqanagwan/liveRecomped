@@ -52,6 +52,7 @@
 | Audio | Working |
 | Controllers | Working (Xbox, PlayStation, Switch through SDL) |
 | Xbox PC app (GDK sideload) | Launches and plays |
+| UWP build (Xbox Developer Mode) | Builds, installs and reaches setup on Windows; untested on console |
 | Online modes | Unavailable |
 | Unlocked framerate | Not supported; game and cutscene speed are tied to 60 Hz |
 | Ultrawide | Not supported; renders 16:9 with letterboxing |
@@ -64,6 +65,30 @@
 2. Launch `NBA LIVE 09`. On first run choose your Xbox 360 ISO; the files are
    extracted once.
 3. Open the system menu with **View + Menu** (or **Esc**) for Settings and Exit.
+
+## Xbox Developer Mode (UWP)
+
+Xbox Developer Mode only runs UWP apps, so this game also has a UWP build. It
+uses the UWP flavour of the ReXGlue SDK installed at `C:\ReXGlue-UWP`: a
+CoreWindow window, XAudio2 audio and XInput, with SDL removed.
+
+1. Build: `.\scripts\build.ps1 -Game LIVE09 -Preset win-amd64-uwp-release`
+2. Test on Windows: `.\scripts\package_uwp.ps1 -Register`, then launch
+   NBA LIVE 09 from Start. Allow file system access for it under
+   Settings > Privacy & security > File system so it can read your ISO.
+3. Package for Xbox: `.\scripts\package_uwp.ps1 -Pack` writes a signed
+   `.msix` and `Dependencies\x64\Microsoft.VCLibs.x64.14.00.appx` to
+   `out\uwp`. In Device Portal choose Add, upload both, then set the app to
+   **Game** in Dev Home so it gets the 5 GB game memory budget.
+
+To build the UWP SDK itself, from the `rexglue-sdk` fork in a Visual Studio
+developer shell:
+
+```
+cmake --preset win-amd64-uwp -DCMAKE_INSTALL_PREFIX=C:/ReXGlue-UWP
+cmake --build --preset win-amd64-uwp-release
+cmake --install out/build/win-amd64-uwp --config Release
+```
 
 ## Default settings
 
