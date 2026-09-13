@@ -1,0 +1,12 @@
+[project]
+name = "nba_live_09"
+sdk_version = "0.10.0"
+game_root = "assets"
+
+[entrypoint]
+file_path = "assets/default.xex"
+out_directory_path = "generated/default"
+includes = [
+    "config/codegen.toml",
+    "config/functions.toml",
+]
