@@ -40,6 +40,10 @@ target_compile_features(live_common PUBLIC cxx_std_23)
 target_include_directories(live_common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(live_common PUBLIC rex::runtime)
 
+if(TARGET imgui)
+    target_include_directories(live_common PUBLIC $<TARGET_PROPERTY:imgui,INTERFACE_INCLUDE_DIRECTORIES>)
+endif()
+
 set(LIVE_GDK_ROOT "C:/Program Files (x86)/Microsoft GDK/260404/windows" CACHE PATH
     "Microsoft GDK windows folder containing include and lib/x64")
 
