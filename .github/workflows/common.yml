@@ -35,6 +35,7 @@ jobs:
           cmake -S common -B build -G Ninja
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_C_COMPILER=clang-20 -DCMAKE_CXX_COMPILER=clang++-20
+          -DCMAKE_C_FLAGS=-march=x86-64-v2 -DCMAKE_CXX_FLAGS=-march=x86-64-v2
           -DREXSDK_DIR=${{ github.workspace }}/thirdparty/rexglue-sdk
 
       - name: Build
