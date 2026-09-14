@@ -82,6 +82,27 @@ class GuestImage:
     def is_code_address(self, address: int) -> bool:
         return any(section.contains(address) for section in self.executable_sections())
 
+    def local_branch_targets(self) -> set[int]:
+        targets = set()
+        for section in self.executable_sections():
+            for address in range(section.start, section.start + section.size, 4):
+                instruction = self.word(address)
+                if PowerPc.is_conditional_branch(instruction):
+                    targets.add(PowerPc.conditional_branch_target(address, instruction))
+                elif PowerPc.is_unconditional_branch(instruction):
+                    targets.add(PowerPc.unconditional_branch_target(address, instruction))
+        return targets
+
+    def data_pointer_targets(self) -> set[int]:
+        targets = set()
+        for section in self.data_sections():
+            first = section.start - (section.start % 4) + (4 if section.start % 4 else 0)
+            for address in range(first, section.start + section.size - 3, 4):
+                value = self.word(address)
+                if value & 0x3 == 0 and self.is_code_address(value):
+                    targets.add(value)
+        return targets
+
     def _read_sections(self) -> list[Section]:
         if self.bytes[:2] != b"MZ":
             raise SystemExit("Image dump does not start with an MZ header")
@@ -115,6 +136,13 @@ class PowerPc:
     @classmethod
     def ends_function(cls, instruction: int) -> bool:
         return instruction in (cls.BLR, cls.BCTR) or cls.is_unconditional_branch(instruction)
+
+    @staticmethod
+    def unconditional_branch_target(address: int, instruction: int) -> int:
+        displacement = instruction & 0x03FFFFFC
+        if displacement & 0x02000000:
+            displacement -= 0x04000000
+        return (address + displacement) & 0xFFFFFFFF
 
     @staticmethod
     def conditional_branch_target(address: int, instruction: int) -> int:

@@ -25,18 +25,8 @@ def candidates_from_data_pointers(image: GuestImage, known: set[int]) -> dict[in
     return found
 
 
-def conditional_branch_targets(image: GuestImage) -> set[int]:
-    targets = set()
-    for section in image.executable_sections():
-        for address in range(section.start, section.start + section.size, 4):
-            instruction = image.word(address)
-            if PowerPc.is_conditional_branch(instruction):
-                targets.add(PowerPc.conditional_branch_target(address, instruction))
-    return targets
-
-
 def candidates_from_code_gaps(image: GuestImage, known: set[int]) -> dict[int, str]:
-    excluded = known | conditional_branch_targets(image)
+    excluded = known | image.local_branch_targets()
     found = {}
     for section in image.executable_sections():
         for address in range(section.start + 4, section.start + section.size, 4):

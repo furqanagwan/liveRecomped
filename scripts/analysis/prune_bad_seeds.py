@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from recomp_project import RecompProject
+from recomp_project import GuestImage, RecompProject
 
 SPLIT_BRANCH_WARNINGS = [
     re.compile(r"Unresolved conditional branch to 0x([0-9A-F]{8}) from 0x([0-9A-F]{8})"),
@@ -38,6 +38,13 @@ def seeds_splitting_functions(project: RecompProject, branches: set[tuple[int, i
     return blamed
 
 
+def seeds_on_local_branch_targets(project: RecompProject, image: GuestImage) -> dict[int, str]:
+    referenced_from_data = image.data_pointer_targets()
+    targets = image.local_branch_targets()
+    return {seed: "is a local branch target"
+            for seed in project.seeds() if seed in targets and seed not in referenced_from_data}
+
+
 def disable_seeds(project: RecompProject, blamed: dict[int, str]) -> None:
     lines = project.functions_config.read_text().splitlines()
     removed = {f'"0x{seed:08X}"' for seed in blamed}
@@ -50,15 +57,22 @@ def disable_seeds(project: RecompProject, blamed: dict[int, str]) -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Remove function seeds that split real functions.")
-    parser.add_argument("codegen_log", type=Path, help="output of rexglue codegen")
+    parser.add_argument("codegen_log", type=Path, nargs="?", help="output of rexglue codegen")
+    parser.add_argument("--image", type=Path,
+                        help="image dump; also disable seeds that plain branches jump to")
     parser.add_argument("--game", default="LIVE09", help="game folder, e.g. LIVE09")
     args = parser.parse_args()
 
     project = RecompProject(args.game)
-    branches = split_branches(args.codegen_log.read_text(errors="replace"))
-    blamed = seeds_splitting_functions(project, branches)
+    blamed = {}
+    if args.codegen_log:
+        branches = split_branches(args.codegen_log.read_text(errors="replace"))
+        blamed.update(seeds_splitting_functions(project, branches))
+        print(f"{len(branches)} split branches")
+    if args.image:
+        blamed.update(seeds_on_local_branch_targets(project, GuestImage(args.image)))
     disable_seeds(project, blamed)
-    print(f"{len(branches)} split branches, {len(blamed)} seeds disabled")
+    print(f"{len(blamed)} seeds disabled")
 
 
 if __name__ == "__main__":
