@@ -40,9 +40,29 @@ def run_codegen(rexglue: str, project: RecompProject, log_path: Path) -> tuple[i
     return result.returncode, output
 
 
+BRANCH_TARGET_REASON = "is a local branch target"
+
+
+def reenable_branch_target_seeds(project: RecompProject, addresses: set[int]) -> set[int]:
+    if not project.disabled_seeds_log.exists():
+        return set()
+    kept_lines = []
+    reenabled = set()
+    for line in project.disabled_seeds_log.read_text().splitlines():
+        fields = line.split(maxsplit=1)
+        if fields and int(fields[0], 16) in addresses and line.endswith(BRANCH_TARGET_REASON):
+            reenabled.add(int(fields[0], 16))
+        else:
+            kept_lines.append(line)
+    if reenabled:
+        project.disabled_seeds_log.write_text("".join(f"{line}\n" for line in kept_lines), newline="\n")
+    return reenabled
+
+
 def seed_unresolved_calls(project: RecompProject, output: str) -> int:
-    existing = project.seeds() | project.disabled_seeds()
-    targets = sorted({int(address, 16) for address in UNRESOLVED_CALL.findall(output)} - existing)
+    unresolved = {int(address, 16) for address in UNRESOLVED_CALL.findall(output)} - project.seeds()
+    reenabled = reenable_branch_target_seeds(project, unresolved)
+    targets = sorted((unresolved - project.disabled_seeds()) | reenabled)
     if targets:
         text = project.functions_config.read_text().rstrip("\n")
         new_lines = "\n".join(f'"0x{target:08X}" = {{}}' for target in targets)
