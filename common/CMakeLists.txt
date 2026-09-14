@@ -20,6 +20,7 @@ add_library(live_common STATIC
     src/input/guest_input_gate.cpp
     src/input/imgui_gamepad_bridge.cpp
     src/installer/disc_image_installer.cpp
+    src/kernel/usb_camera_stubs.cpp
     src/platform/gaming_runtime_session.cpp
     src/settings/user_settings_store.cpp
     src/ui/dialog_layout.cpp

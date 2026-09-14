@@ -11,7 +11,6 @@ live_recomp_add_game(nba_live_09
     OUTPUT_NAME "NBA LIVE 09"
     SOURCES
         src/main.cpp
-        src/kernel/usb_camera_stubs.cpp
     SETTINGS "${CMAKE_CURRENT_SOURCE_DIR}/settings/nba_live_09.toml"
     ICON "${CMAKE_CURRENT_SOURCE_DIR}/metadata/nba_live_09.ico"
     RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/nba_live_09.rc"
