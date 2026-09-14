@@ -67,6 +67,7 @@ void LiveRecompApp::OnConfigureStyle(ImGuiStyle& imgui_style, rex::ui::Style& ov
 void LiveRecompApp::OnCreateDialogs(rex::ui::ImGuiDrawer*) {
   if (auto* game_window = window()) {
     game_window->SetTitle(descriptor_.display_name);
+    game_window->SetCursorVisibility(rex::ui::Window::CursorVisibility::kAutoHidden);
   }
   rex::ui::RegisterBind(kSystemMenuBind, "Escape", "Open the system menu", [this] { ToggleSystemMenu(); });
 }
