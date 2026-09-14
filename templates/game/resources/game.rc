@@ -18,7 +18,7 @@ BEGIN
             VALUE "CompanyName", "Electronic Arts"
             VALUE "FileDescription", "@DISPLAY_NAME@"
             VALUE "ProductName", "@DISPLAY_NAME@"
-            VALUE "LegalCopyright", "(c) 2008 Electronic Arts Inc."
+            VALUE "LegalCopyright", "(c) @RELEASE_YEAR@ Electronic Arts Inc."
             VALUE "InternalName", "@PROJECT_NAME@"
             VALUE "OriginalFilename", "@DISPLAY_NAME@.exe"
             VALUE "FileVersion", "1.0.0.0"

@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory)][string]$Folder,
     [Parameter(Mandatory)][string]$ProjectName,
     [Parameter(Mandatory)][string]$DisplayName,
+    [Parameter(Mandatory)][string]$ReleaseYear,
     [string]$Rexglue = "rexglue"
 )
 
@@ -24,9 +25,12 @@ $replacements = @{
     '@APP_CLASS@'      = $appClass
     '@IDENTITY_NAME@'  = "ElectronicArts.$($identityAlias.ToUpper())"
     '@IDENTITY_ALIAS@' = $identityAlias
+    '@RELEASE_YEAR@'   = $ReleaseYear
 }
 $destinations = @{
     'CMakeLists.txt'           = 'CMakeLists.txt'
+    'CMakePresets.json'        = 'CMakePresets.json'
+    'uwp\AppxManifest.xml'     = 'uwp\AppxManifest.xml'
     'src\main.cpp'             = 'src\main.cpp'
     'src\app.h'                = "src\$($ProjectName)_app.h"
     'settings\game.toml'       = "settings\$ProjectName.toml"

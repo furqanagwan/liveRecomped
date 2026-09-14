@@ -8,6 +8,7 @@ code and no extracted artwork.
 | Game | Folder | Status |
 | --- | --- | --- |
 | NBA LIVE 09 (Europe, 4541087A) | `LIVE09/` | Boots, menus, practice, Play Now matches |
+| NBA LIVE 10 (Europe/Asia, 454108C1) | `LIVE10/` | Boots, menus, profiles save; music sometimes stops |
 
 ## Repository layout
 
@@ -21,7 +22,8 @@ common/                     live_common library shared by all games
   include/live/settings     UserSettingsStore
   include/live/ui           DiscInstallDialog, SystemMenuDialog, SettingsDialog, MonochromeTheme
   include/live/debug        GuestImageDump
-LIVE09/                     NBA LIVE 09: descriptor, kernel stubs, codegen config, settings, GDK config
+  src/kernel                Kernel stubs every game shares (Xbox Live Vision camera)
+LIVE09/, LIVE10/            One folder per game: descriptor, codegen config, settings, GDK and UWP metadata
 templates/game/             Starting point for the next game
 scripts/                    build, packaging, new game, analysis tools
 thirdparty/rexglue-sdk      ReXGlue fork with the fixes these games need
@@ -118,25 +120,27 @@ IDs, so it is for personal testing only.
 ## Adding the next game
 
 ```
-.\scripts\new_game.ps1 -Folder LIVE10 -ProjectName nba_live_10 -DisplayName "NBA LIVE 10"
+.\scripts\new_game.ps1 -Folder LIVE11 -ProjectName nba_live_11 -DisplayName "NBA LIVE 11" -ReleaseYear 2010
 ```
 
-Extract the disc into `LIVE10/assets` first. The script runs `rexglue init`,
-renders `templates/game`, and wires the codegen config. Then iterate on codegen
-until it reports no unresolved calls.
+Extract the disc into the game's `assets` folder first. The script runs
+`rexglue init`, renders `templates/game` (CMake presets, settings, GDK and UWP
+manifests, version resource) and wires the codegen config. Artwork:
+`scripts/generate_artwork.ps1` builds the exe icon and Xbox app images from an
+upscaled `metadata/gdk_hd/title_1024.png`.
 
 ### Recompilation workflow
 
-1. Build; fix `UnresolvedCall` errors by seeding the target addresses in
-   `config/functions.toml`.
+1. `python scripts/analysis/stabilize_codegen.py --game <GAME>` runs codegen
+   until it is clean: it seeds `UnresolvedCall` targets and disables seeds that
+   split functions (`Unresolved conditional branch`, `Jump target ... unresolved`),
+   recording them in `config/disabled_function_seeds.txt`.
 2. Runtime `Call to invalid or unregistered function`: dump the loaded image with
-   `LIVE_RECOMP_DUMP_IMAGE=<GAME>/out/image_dump.bin`, then
-   `python scripts/analysis/find_missing_functions.py --game <GAME> [--gaps] --write`.
-3. After seeding, codegen must report no `Unresolved conditional branch` or
-   `Jump target ... unresolved` lines; otherwise run
-   `python scripts/analysis/prune_bad_seeds.py --game <GAME> <codegen log>`,
-   which records removed seeds in `config/disabled_function_seeds.txt`.
-4. Missing kernel imports at link time become stubs in `src/kernel/`.
+   `LIVE_RECOMP_DUMP_IMAGE=<GAME>/out/image_dump.bin`, run
+   `python scripts/analysis/find_missing_functions.py --game <GAME> --write`
+   (data pointers) and, if needed, again with `--gaps`, then step 1.
+3. Missing kernel imports at link time become stubs: in `common/src/kernel` when
+   the EA engine shares them, otherwise in the game's `src/kernel`.
 
 Other codegen overrides (`switch_tables`, `midasm_hook`, `indirect_calls`,
 `invalid_instructions`, `rexcrt`) follow `rex::codegen::RecompilerConfig`; add a
@@ -152,6 +156,9 @@ Per-game research notes live in `<GAME>/docs/NOTES.md`.
 - codegen: `vpkuwus`/`vpkuhus` read aliased sources before writing (VP6 video colour)
 - input: `InputSystem` entry points are serialized (concurrent polling crash)
 - gpu/d3d12: issued draws feed the debug overlay counter
+- kernel: 64-bit export arguments (XUIDs, file times) are no longer truncated,
+  which broke NBA LIVE 10 profile saves
+- platform: a UWP build (`REXGLUE_PLATFORM_UWP`) for Xbox Developer Mode
 
 ## Legal
 
