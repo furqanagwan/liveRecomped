@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="metadata/gdk_hd/title_1024.png" alt="NBA LIVE 09" width="320">
+  <img src="docs/icon.png" alt="NBA LIVE 09" width="320">
 </p>
 
 <h1 align="center">NBA LIVE 09</h1>
@@ -8,10 +8,6 @@
   Native PC static recompilation of the Xbox 360 version, built on the
   <a href="../README.md">liveRecomped</a> framework and ReXGlue.
 </p>
-
-> The title artwork above is extracted from your own `default.xex` and is not
-> committed; it appears after the first build of the metadata (see
-> [Artwork](#artwork)).
 
 ## Game
 
@@ -28,11 +24,24 @@
 | Rating | ESRB Everyone |
 | Achievements | 23, 1000 Gamerscore |
 
+## Regions
+
+| Region | Serial | Status |
+| --- | --- | --- |
+| 🇪🇺 Europe | `EA-2170` | ✅ Tested (the disc below) |
+| 🇺🇸 USA | `EA-2170` | ⬜ Not tested |
+| 🇯🇵 Japan | `EA-2170` | ⬜ Not tested |
+| 🌏 Asia | `EA-2170` | ⬜ Not tested |
+
+Only the tested disc's `default.xex` has been recompiled. Other regional
+executables are likely to differ and may need their own codegen pass.
+Region list from [Redump](http://redump.org/discs/system/xbox360/).
+
 ## Disc
 
 | | |
 | --- | --- |
-| Region | Europe |
+| Region | 🇪🇺 Europe |
 | Title ID | `4541087A` |
 | Media ID | `6653832E` |
 | Executable version | 0.0.0.2 (built 2008-08-18) |
@@ -51,6 +60,7 @@
 | Play Now matches | Working |
 | Audio | Working |
 | Controllers | Working (Xbox, PlayStation, Switch through SDL) |
+| DLC | Installer in place (see the [root README](../README.md#dlc)); no packages tested |
 | Xbox PC app (GDK sideload) | Launches and plays |
 | UWP build (Xbox Developer Mode) | Builds, installs and reaches setup on Windows; untested on console |
 | Online modes | Unavailable |
@@ -135,16 +145,18 @@ The full investigation log, including every crash and how it was fixed, is in
 | `resources/nba_live_09.rc` | Windows icon and version information |
 | `assets/` | Your extracted game files (not committed) |
 | `generated/` | Recompiled C++ (not committed) |
+| `docs/icon.png` | HD title icon shown above |
 | `metadata/` | Artwork extracted from your disc (not committed) |
 
 ## Artwork
 
-The icon, Xbox PC app tiles and splash screen are generated locally from the
-64x64 title image inside `default.xex`:
+`docs/icon.png` is the 64x64 title image inside `default.xex`, upscaled to
+1024x1024. The exe icon, Xbox PC app tiles and splash screen are generated
+locally from it:
 
 1. `rexglue init --project-name nba_live_09 --xex-path assets\default.xex achievements assets\default.xex metadata`
 2. Upscale `metadata/icons/title.png` (Real-ESRGAN `realesrgan-x4plus`, 4x twice)
-   to `metadata/gdk_hd/title_1024.png`.
+   to `metadata/gdk_hd/title_1024.png`, or copy `docs/icon.png` there.
 3. Render `nba_live_09.ico` and the exact-size GDK images (100, 150, 44,
    1920x1080) into `metadata/` from that file.
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="metadata/gdk_hd/title_1024.png" alt="NBA LIVE 10" width="320">
+  <img src="docs/icon.png" alt="NBA LIVE 10" width="320">
 </p>
 
 <h1 align="center">NBA LIVE 10</h1>
@@ -8,9 +8,6 @@
   Native PC static recompilation of the Xbox 360 version, built on the
   <a href="../README.md">liveRecomped</a> framework and ReXGlue.
 </p>
-
-> The title artwork above is extracted from your own `default.xex` and is not
-> committed; it appears after the artwork step (see [Artwork](#artwork)).
 
 ## Game
 
@@ -25,11 +22,23 @@
 | Modes | Single-player, local multiplayer, online (servers offline) |
 | Achievements | 33, 1000 Gamerscore |
 
+## Regions
+
+| Region | Serial | Status |
+| --- | --- | --- |
+| 🇪🇺 🌏 Europe, Asia | `EA-2241` | ✅ Tested (the disc below) |
+| 🇺🇸 USA | `EA-2241` | ⬜ Not tested |
+| 🇯🇵 Japan | `EA-2241` | ⬜ Not tested |
+
+Only the tested disc's `default.xex` has been recompiled. Other regional
+executables are likely to differ and may need their own codegen pass.
+Region list from [Redump](http://redump.org/discs/system/xbox360/).
+
 ## Disc
 
 | | |
 | --- | --- |
-| Region | Europe, Asia |
+| Region | 🇪🇺 🌏 Europe, Asia |
 | Title ID | `454108C1` |
 | Contents | 64 files, 6,267,027,825 bytes |
 | Executable | `default.xex`, 20,299,776 bytes |
@@ -45,6 +54,7 @@
 | Profile creation and loading | Working (needed the SDK 64-bit argument fix) |
 | Music | Plays, but sometimes stops; under investigation |
 | Controllers | Working through SDL |
+| DLC | Installer in place (see the [root README](../README.md#dlc)); no packages tested |
 | Matches | Not yet tested |
 | Xbox PC app, UWP builds | Configured, not yet tested |
 | Linux, macOS, Steam Deck | Builds expected, not play-tested |
@@ -95,10 +105,14 @@ Same flow as NBA LIVE 09, using `uwp/AppxManifest.xml`:
 
 ## Artwork
 
+`docs/icon.png` is the title image from `default.xex`, upscaled to 1024x1024.
+To regenerate the exe icon and Xbox app images locally:
+
 1. Extract achievements and the title image:
    `rexglue init --project-name nba_live_10 --xex-path assets\default.xex achievements assets\default.xex metadata`
 2. Upscale `metadata/icons/title.png` 4x twice with Real-ESRGAN
-   (`realesrgan-x4plus`) to `metadata/gdk_hd/title_1024.png`.
+   (`realesrgan-x4plus`) to `metadata/gdk_hd/title_1024.png`, or copy
+   `docs/icon.png` there.
 3. `.\scripts\generate_artwork.ps1 -Game LIVE10 -ProjectName nba_live_10`
    writes the exe icon and the Xbox app images.
 
