@@ -44,6 +44,10 @@ std::filesystem::path GamePaths::ResolveGameRoot(const std::filesystem::path& re
   return executable_folder_writable_ ? executable_folder_ / "game" : user_data_root_ / "game";
 }
 
+std::filesystem::path GamePaths::dlc_folder() const {
+  return executable_folder_writable_ ? executable_folder_ / "dlc" : user_data_root_ / "dlc";
+}
+
 bool GamePaths::IsWritableFolder(const std::filesystem::path& folder) {
   const auto probe = folder / kWriteProbeFile;
   std::FILE* file = rex::filesystem::OpenFile(probe, "wb");

@@ -17,6 +17,7 @@ class GamePaths {
   bool portable() const { return portable_; }
   const std::filesystem::path& user_data_root() const { return user_data_root_; }
   std::filesystem::path settings_file() const { return user_data_root_ / "settings.toml"; }
+  std::filesystem::path dlc_folder() const;
 
  private:
   static bool IsWritableFolder(const std::filesystem::path& folder);

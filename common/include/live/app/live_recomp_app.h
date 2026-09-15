@@ -36,6 +36,7 @@ class LiveRecompApp : public rex::ReXApp {
 
  private:
   bool InstallFromEnvironment(const std::filesystem::path& game_root);
+  void InstallContentPackages();
   void ToggleSystemMenu();
   void OpenSystemMenu();
   void OpenSettings();

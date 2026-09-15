@@ -13,6 +13,7 @@ struct SettingsContext {
   std::filesystem::path settings_file;
   std::filesystem::path game_data_root;
   std::filesystem::path user_data_root;
+  std::filesystem::path dlc_folder;
   bool portable = false;
   std::function<void(bool)> apply_fullscreen;
   std::function<void()> on_closed;

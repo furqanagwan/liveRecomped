@@ -151,6 +151,10 @@ void SettingsDialog::DrawGameFilesTab() {
   ImGui::TextDisabled("Saves, cache and settings");
   ImGui::TextWrapped("%s", context_.user_data_root.string().c_str());
   ImGui::Spacing();
+  ImGui::TextDisabled("DLC");
+  ImGui::TextWrapped("%s", context_.dlc_folder.string().c_str());
+  ImGui::TextWrapped("Put downloadable content packages here; they are installed the next time the game starts.");
+  ImGui::Spacing();
   ImGui::TextWrapped("%s", context_.portable
                                ? "Portable mode is on."
                                : "Create an empty portable.txt next to the executable to keep saves beside it.");
