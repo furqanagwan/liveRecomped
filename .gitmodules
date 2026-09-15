@@ -1,4 +1,4 @@
 [submodule "thirdparty/rexglue-sdk"]
 	path = thirdparty/rexglue-sdk
 	url = https://github.com/furqanagwan/rexglue-sdk.git
-	branch = liverecomp-fixes
+	branch = fixes

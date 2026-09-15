@@ -38,7 +38,7 @@ from `common/`.
 ## Requirements
 
 - CMake 3.25+, Ninja, Clang 18+ (Clang 20 on Linux)
-- ReXGlue SDK: the `thirdparty/rexglue-sdk` submodule (branch `liverecomp-fixes`),
+- ReXGlue SDK: the `thirdparty/rexglue-sdk` submodule (branch `fixes`),
   either installed (`CMAKE_PREFIX_PATH`) or passed as `REXSDK_DIR`
 - Windows: Visual Studio build tools and the Windows SDK; optional Microsoft GDK
   for Xbox PC app integration
@@ -166,7 +166,7 @@ Per-game research notes live in `<GAME>/docs/NOTES.md`.
 ## ReXGlue fork
 
 `thirdparty/rexglue-sdk` tracks
-[furqanagwan/rexglue-sdk@liverecomp-fixes](https://github.com/furqanagwan/rexglue-sdk/tree/liverecomp-fixes):
+[furqanagwan/rexglue-sdk@fixes](https://github.com/furqanagwan/rexglue-sdk/tree/fixes):
 
 - codegen: `vpkuwus`/`vpkuhus` read aliased sources before writing (VP6 video colour)
 - input: `InputSystem` entry points are serialized (concurrent polling crash)
@@ -174,6 +174,10 @@ Per-game research notes live in `<GAME>/docs/NOTES.md`.
 - kernel: 64-bit export arguments (XUIDs, file times) are no longer truncated,
   which broke NBA LIVE 10 profile saves
 - platform: a UWP build (`REXGLUE_PLATFORM_UWP`) for Xbox Developer Mode
+- system: repeated export lookups reuse their thunk (upstream #420)
+- filesystem: relative guest paths resolve against `game:` (upstream #405)
+- upstream PRs #422, #423, #424 (Windows clone and install build fixes),
+  #384 (config loaded before path settings) and #382 (host FP exceptions stay masked)
 
 ## Legal
 
