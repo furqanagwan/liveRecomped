@@ -68,13 +68,38 @@ Region list from [Redump](http://redump.org/discs/system/xbox360/).
 | Ultrawide | Not supported; renders 16:9 with letterboxing |
 | Linux, macOS, Steam Deck | Builds expected, not play-tested |
 
-## Getting started
+## Play
 
-1. Build from the repository root:
-   `.\scripts\build.ps1 -Game LIVE09` or `./scripts/build.sh LIVE09`.
-2. Launch `NBA LIVE 09`. On first run choose your Xbox 360 ISO; the files are
-   extracted once.
+1. Download `NBALIVE09-v<version>-windows-x64.zip` from
+   [Releases](https://github.com/furqanagwan/liveRecomped/releases?q=LIVE09)
+   and extract it to a folder you can write to.
+2. Run `NBA LIVE 09.exe` and choose your Xbox 360 ISO (European disc, see
+   [Regions](#regions)); the files are copied once.
 3. Open the system menu with **View + Menu** (or **Esc**) for Settings and Exit.
+
+## System requirements
+
+| | Required |
+| --- | --- |
+| OS | Windows 10 version 2004 (build 19041) or Windows 11, 64-bit |
+| Processor | 64-bit x86 CPU with SSE4.1 |
+| Graphics | DirectX 12 GPU (feature level 11_0) |
+| Memory | 8 GB RAM recommended |
+| Storage | 6.5 GB, plus room for the ISO while it is copied |
+| Software | [Microsoft Visual C++ Redistributable 2015-2022 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) |
+| Game | Your own NBA LIVE 09 (Europe) Xbox 360 disc image |
+
+Tested on an Intel Core Ultra 9 275HX, GeForce RTX 5080 Laptop GPU and 32 GB RAM
+(Windows 11).
+
+## Build from source
+
+```
+rexglue extract "<your disc>.iso" LIVE09\assets
+.\framework\scripts\build.ps1 -Game LIVE09
+```
+
+Setup is described in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Xbox Developer Mode (UWP)
 
@@ -82,17 +107,17 @@ Xbox Developer Mode only runs UWP apps, so this game also has a UWP build. It
 uses the UWP flavour of the ReXGlue SDK installed at `C:\ReXGlue-UWP`: a
 CoreWindow window, XAudio2 audio and XInput, with SDL removed.
 
-1. Build: `.\scripts\build.ps1 -Game LIVE09 -Preset win-amd64-uwp-release`
-2. Test on Windows: `.\scripts\package_uwp.ps1 -Register`, then launch
+1. Build: `.\framework\scripts\build.ps1 -Game LIVE09 -Preset win-amd64-uwp-release`
+2. Test on Windows: `.\framework\scripts\package_uwp.ps1 -Game LIVE09 -Register`, then launch
    NBA LIVE 09 from Start. Allow file system access for it under
    Settings > Privacy & security > File system so it can read your ISO.
-3. Package for Xbox: `.\scripts\package_uwp.ps1 -Pack` writes a signed
+3. Package for Xbox: `.\framework\scripts\package_uwp.ps1 -Game LIVE09 -Pack` writes a signed
    `.msix` and `Dependencies\x64\Microsoft.VCLibs.x64.14.00.appx` to
    `out\uwp`. In Device Portal choose Add, upload both, then set the app to
    **Game** in Dev Home so it gets the 5 GB game memory budget.
 
-To build the UWP SDK itself, from the `rexglue-sdk` fork in a Visual Studio
-developer shell:
+To build the UWP SDK itself, from `framework/thirdparty/rexglue-sdk` in a Visual
+Studio developer shell:
 
 ```
 cmake --preset win-amd64-uwp -DCMAKE_INSTALL_PREFIX=C:/ReXGlue-UWP
@@ -113,7 +138,7 @@ the in-game menu override it.
 | `async_shader_compilation` | `false` | Same as above |
 | `vsync`, `video_mode_refresh_rate` | `true`, `60` | Gameplay speed is frame-locked |
 | `gpu_allow_invalid_fetch_constants` | `true` | Silences thousands of harmless texture warnings |
-| `live_shared_controllers` | `true` | Every controller drives player 1 |
+| `recomp_shared_controllers` | `true` | Every controller drives player 1 |
 
 ## Recompilation notes
 
@@ -122,7 +147,7 @@ the in-game menu override it.
 | Generated sources | 497 files, about 257 MB |
 | Function seeds | 429 active in `config/functions.toml` |
 | Disabled seeds | 58 in `config/disabled_function_seeds.txt` (they split real functions) |
-| Kernel stubs | `XUsbcamGetState`, `XUsbcamSetConfig` (Xbox Live Vision camera) |
+| Kernel stubs | `XUsbcamGetState`, `XUsbcamSetConfig` (Xbox Live Vision camera), shared from `framework/common/src/kernel` |
 | Known codegen warnings | 26 unhandled `vpkd3d128` float16 packs, one 1.36 MB function |
 
 SDK fixes required by this game, carried on the ReXGlue fork:
@@ -138,7 +163,7 @@ The full investigation log, including every crash and how it was fixed, is in
 | Path | Purpose |
 | --- | --- |
 | `src/nba_live_09_app.h` | Game descriptor |
-| `src/kernel/usb_camera_stubs.cpp` | Missing kernel imports |
+| `release.json` | Supported disc and system requirements for release packaging |
 | `config/` | Codegen overrides and function seeds |
 | `settings/` | Runtime defaults |
 | `gdk/MicrosoftGame.config` | Xbox PC app package metadata |
@@ -157,8 +182,8 @@ locally from it:
 1. `rexglue init --project-name nba_live_09 --xex-path assets\default.xex achievements assets\default.xex metadata`
 2. Upscale `metadata/icons/title.png` (Real-ESRGAN `realesrgan-x4plus`, 4x twice)
    to `metadata/gdk_hd/title_1024.png`, or copy `docs/icon.png` there.
-3. Render `nba_live_09.ico` and the exact-size GDK images (100, 150, 44,
-   1920x1080) into `metadata/` from that file.
+3. `.\framework\scripts\generate_artwork.ps1 -Game LIVE09 -ProjectName nba_live_09`
+   writes the exe icon and the Xbox app images.
 
 ## Legal
 

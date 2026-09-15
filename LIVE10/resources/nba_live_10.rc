@@ -15,10 +15,10 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Electronic Arts"
-            VALUE "FileDescription", "NBA LIVE 10"
+            VALUE "CompanyName", "Unofficial recompilation"
+            VALUE "FileDescription", "NBA LIVE 10 (unofficial native PC recompilation)"
             VALUE "ProductName", "NBA LIVE 10"
-            VALUE "LegalCopyright", "(c) 2009 Electronic Arts Inc."
+            VALUE "LegalCopyright", "NBA LIVE 10 (c) 2009 Electronic Arts. Not affiliated with or endorsed by Electronic Arts."
             VALUE "InternalName", "nba_live_10"
             VALUE "OriginalFilename", "NBA LIVE 10.exe"
             VALUE "FileVersion", "1.0.0.0"

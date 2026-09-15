@@ -1,116 +1,102 @@
 # liveRecomped
 
-Native PC static recompilations of EA's NBA LIVE games for Xbox 360, built on
-[ReXGlue](https://github.com/rexglue/rexglue-sdk). Every game is recompiled from
-the player's own disc image; this repository contains no game data and no
-generated code. The only artwork committed is each game's HD title icon
-(`<GAME>/docs/icon.png`), shown in that game's README.
+Unofficial native PC versions of EA's NBA LIVE games for Xbox 360, made by
+statically recompiling the original game code with
+[ReXGlue](https://github.com/rexglue/rexglue-sdk). Download the game's
+executable, point it at your own Xbox 360 disc image, and play.
 
-| Game | Folder | Status |
-| --- | --- | --- |
-| [NBA LIVE 09](LIVE09/README.md) (Europe, 4541087A) | `LIVE09/` | Boots, menus, practice, Play Now matches |
-| [NBA LIVE 10](LIVE10/README.md) (Europe/Asia, 454108C1) | `LIVE10/` | Boots, menus, profiles save; music sometimes stops |
+This repository and its releases contain no game data: no disc images, game
+files or extracted assets. You must own the game.
 
-## Repository layout
+| Game | Supported disc | Status | Download |
+| --- | --- | --- | --- |
+| [NBA LIVE 09](LIVE09/README.md) | 🇪🇺 Europe (`4541087A`) | Boots, menus, practice, Play Now matches | [Releases](https://github.com/furqanagwan/liveRecomped/releases?q=LIVE09) |
+| [NBA LIVE 10](LIVE10/README.md) | 🇪🇺 🌏 Europe, Asia (`454108C1`) | Boots, menus, profiles save; music sometimes stops | [Releases](https://github.com/furqanagwan/liveRecomped/releases?q=LIVE10) |
 
-```
-cmake/LiveRecomp.cmake      live_recomp_add_game(): shared build setup for every game
-common/                     live_common library shared by all games
-  include/live/app          LiveRecompApp base class, GameDescriptor, GamePaths
-  include/live/installer    DiscImageInstaller (Xbox 360 ISO extraction)
-  include/live/input        ControllerMenuWatcher, GuestInputGate, ImGuiGamepadBridge
-  include/live/platform     NativeFilePicker, GamingRuntimeSession (Xbox PC app)
-  include/live/settings     UserSettingsStore
-  include/live/ui           DiscInstallDialog, SystemMenuDialog, SettingsDialog, MonochromeTheme
-  include/live/debug        GuestImageDump
-  src/kernel                Kernel stubs every game shares (Xbox Live Vision camera)
-LIVE09/, LIVE10/            One folder per game: descriptor, codegen config, settings, GDK and UWP metadata
-templates/game/             Starting point for the next game
-scripts/                    build, packaging, new game, analysis tools
-thirdparty/rexglue-sdk      ReXGlue fork with the fixes these games need
-```
+## Playing
 
-A game folder only holds what is unique to that title: a `GameDescriptor`,
-game-specific kernel stubs or hooks, the codegen overrides in `config/`, runtime
-defaults in `settings/`, and packaging metadata in `gdk/`. Everything else comes
-from `common/`.
+1. Check the [system requirements](#system-requirements) and install the
+   [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe).
+2. Download the game's zip from [Releases](https://github.com/furqanagwan/liveRecomped/releases)
+   and extract it to a folder you can write to (not Program Files).
+3. Run the game's `.exe` and choose your Xbox 360 ISO when asked. The files are
+   copied next to the executable once; the ISO isn't needed after that.
 
-## Requirements
+Check your disc against the game's supported regions first (see its README):
+each release is recompiled from one regional executable.
 
-- CMake 3.25+, Ninja, Clang 18+ (Clang 20 on Linux)
-- ReXGlue SDK: the `thirdparty/rexglue-sdk` submodule (branch `fixes`),
-  either installed (`CMAKE_PREFIX_PATH`) or passed as `REXSDK_DIR`
-- Windows: Visual Studio build tools and the Windows SDK; optional Microsoft GDK
-  for Xbox PC app integration
-- Linux / Steam Deck: Vulkan and GTK development packages as listed in the ReXGlue README
+### Controls
 
-```
-git clone --recursive https://github.com/furqanagwan/liveRecomped.git
-```
-
-## Building
-
-The recompiled C++ is generated at build time from `<GAME>/assets/default.xex`,
-so extract your disc into the game's `assets` folder first (the game's own
-installer can do this, see below, or any Xbox 360 ISO extractor).
-
-Windows (Developer PowerShell or plain PowerShell):
-
-```
-.\scripts\build.ps1 -Game LIVE09
-.\scripts\build.ps1 -Game LIVE09 -Preset win-amd64-relwithdebinfo -SdkDir thirdparty\rexglue-sdk
-```
-
-Linux, macOS and Steam Deck:
-
-```
-./scripts/build.sh LIVE09
-REXSDK_DIR=$PWD/thirdparty/rexglue-sdk ./scripts/build.sh LIVE09 linux-amd64-release
-```
-
-Linux, macOS and Steam Deck builds use the Vulkan renderer. They are expected to
-compile with the presets in each game folder but have not been play-tested yet.
-
-## First run
-
-If `default.xex` is missing, the game opens a setup window: browse to (or type the
-path of) your Xbox 360 ISO and the files are extracted once. The native file
-picker is used on Windows, `zenity`/`kdialog` on Linux and Finder on macOS; on
-Steam Deck Game Mode type the path. Unattended installs:
-`LIVE_RECOMP_INSTALL_ISO=/path/to/game.iso`.
-
-Game files go next to the executable, or into the user data folder when the
-executable folder is read-only (packaged installs). An empty `portable.txt` next
-to the executable keeps saves, cache and settings beside it.
-
-## DLC
-
-Put downloadable content packages (the `CON`, `LIVE` or `PIRS` files from an
-Xbox 360 `Content\0000000000000000\<TitleID>\00000002` folder) in the `dlc`
-folder next to the executable, or in `<user data>/dlc` when that folder is not
-writable. Each package is checked against the game's title ID and installed
-into the user data folder on the next start; already installed packages are
-skipped. Unattended installs: `LIVE_RECOMP_INSTALL_DLC=/path/to/package-or-folder`.
-The Settings > Game files page shows the folder.
-
-Title updates (content type `000B0000`) are skipped: they replace game code, so
-they need a recompile from the updated `default.xex`.
-
-## Controls
-
-- Xbox, PlayStation, Switch and Steam Deck controllers work through SDL; all
-  controllers drive player 1 unless `live_shared_controllers` is turned off.
+- Xbox, PlayStation, Switch and Steam Deck controllers work out of the box; all
+  controllers drive player 1 unless *All controllers control player 1* is turned
+  off in Settings.
 - System menu (Resume, Settings, Exit Game): press **View + Menu** together, or
   **Esc**. The Guide button is reserved for Windows Game Bar, Xbox mode and Steam,
   and only opens the menu when `guide_button = true`.
 - In menus: D-pad or left stick to move, A to select, B to go back.
 
-## Settings
+### DLC
+
+Put downloadable content packages (the `CON`, `LIVE` or `PIRS` files from an
+Xbox 360 `Content\0000000000000000\<TitleID>\00000002` folder) in the `dlc`
+folder next to the executable. Each package is checked against the game's title
+ID and installed on the next start. Title updates are skipped: they replace game
+code, so they need a new recompilation.
+
+### Saves and settings
+
+Saves, settings and logs go to your user folder; Settings > Game files shows
+where. An empty `portable.txt` next to the executable keeps them beside it.
+
+## System requirements
+
+| | Required |
+| --- | --- |
+| OS | Windows 10 version 2004 (build 19041) or Windows 11, 64-bit |
+| Processor | 64-bit x86 CPU with SSE4.1 |
+| Graphics | DirectX 12 GPU (feature level 11_0) |
+| Memory | 8 GB RAM recommended |
+| Storage | NBA LIVE 09: 6.5 GB, NBA LIVE 10: 6.5 GB, plus room for the ISO while it is copied |
+| Software | [Microsoft Visual C++ Redistributable 2015-2022 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) |
+| Game | Your own Xbox 360 disc image of a supported region |
+
+Tested on an Intel Core Ultra 9 275HX, NVIDIA GeForce RTX 5080 Laptop GPU and
+32 GB RAM running Windows 11. Lower-end hardware hasn't been tested yet; reports
+are welcome. Linux, macOS and Steam Deck builds compile but have no releases and
+haven't been play-tested.
+
+## Developing
+
+The shared app framework (installer, menus, input, packaging scripts) lives in
+[recomp-framework](https://github.com/furqanagwan/recomp-framework), included here
+as the `framework` submodule together with the ReXGlue fork.
+
+```
+git clone --recursive https://github.com/furqanagwan/liveRecomped.git
+cd liveRecomped
+rexglue extract "<your disc>.iso" LIVE09\assets
+.\framework\scripts\build.ps1 -Game LIVE09
+```
+
+```
+framework/                  recomp-framework submodule (with thirdparty/rexglue-sdk)
+LIVE09/                     NBA LIVE 09: descriptor, codegen config, settings, GDK/UWP metadata
+LIVE10/                     NBA LIVE 10
+<GAME>/docs/NOTES.md        Research notes: codegen, crashes and fixes
+<GAME>/release.json         Supported disc and system requirements for release packaging
+```
+
+A game folder only holds what is unique to that title: a `GameDescriptor`,
+game-specific kernel stubs or hooks, the codegen overrides in `config/`, runtime
+defaults in `settings/`, and packaging metadata in `gdk/` and `uwp/`. Everything
+else comes from the framework.
+
+### Settings NBA LIVE needs
 
 Defaults live in `<GAME>/settings/<project>.toml` and are copied next to the
 executable. Changes made in the in-game Settings menu are saved to
 `settings.toml` in the user data folder and override the defaults; command-line
-flags override both. NBA LIVE 09 needs:
+flags override both.
 
 | Setting | Why |
 | --- | --- |
@@ -118,69 +104,13 @@ flags override both. NBA LIVE 09 needs:
 | `d3d12_pipeline_creation_threads = 0`, `async_shader_compilation = false` | Background pipeline creation corrupted the heap when a match started |
 | `vsync = true`, `video_mode_refresh_rate = 60` | Game and cutscene speed are tied to 60 Hz |
 
-## Xbox PC app (Microsoft GDK)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, adding NBA LIVE 11 and making
+releases.
 
-With the Microsoft GDK installed the build links the Gaming Runtime so the Xbox
-app sees the game as running. For local testing (Developer Mode on):
+## License
 
-```
-.\scripts\package_gdk.ps1 -Game LIVE09 -Pack -Install
-```
+The code in this repository is BSD 3-Clause, see [LICENSE](LICENSE).
 
-Shell images must be exactly 100, 150, 44 and 1920x1080 px and are read from
-`<GAME>/metadata/gdk_hd`. The packaged identity is a local stand-in with no Store
-IDs, so it is for personal testing only.
-
-## Adding the next game
-
-```
-.\scripts\new_game.ps1 -Folder LIVE11 -ProjectName nba_live_11 -DisplayName "NBA LIVE 11" -ReleaseYear 2010
-```
-
-Extract the disc into the game's `assets` folder first. The script runs
-`rexglue init`, renders `templates/game` (CMake presets, settings, GDK and UWP
-manifests, version resource) and wires the codegen config. Artwork:
-`scripts/generate_artwork.ps1` builds the exe icon and Xbox app images from an
-upscaled `metadata/gdk_hd/title_1024.png`; copy that file to `<GAME>/docs/icon.png`
-and show it at the top of the game's `README.md`.
-
-### Recompilation workflow
-
-1. `python scripts/analysis/stabilize_codegen.py --game <GAME>` runs codegen
-   until it is clean: it seeds `UnresolvedCall` targets and disables seeds that
-   split functions (`Unresolved conditional branch`, `Jump target ... unresolved`),
-   recording them in `config/disabled_function_seeds.txt`.
-2. Runtime `Call to invalid or unregistered function`: dump the loaded image with
-   `LIVE_RECOMP_DUMP_IMAGE=<GAME>/out/image_dump.bin`, run
-   `python scripts/analysis/find_missing_functions.py --game <GAME> --write`
-   (data pointers) and, if needed, again with `--gaps`, then step 1.
-3. Missing kernel imports at link time become stubs: in `common/src/kernel` when
-   the EA engine shares them, otherwise in the game's `src/kernel`.
-
-Other codegen overrides (`switch_tables`, `midasm_hook`, `indirect_calls`,
-`invalid_instructions`, `rexcrt`) follow `rex::codegen::RecompilerConfig`; add a
-TOML file under `config/` and list it in the manifest `includes`.
-
-Per-game research notes live in `<GAME>/docs/NOTES.md`.
-
-## ReXGlue fork
-
-`thirdparty/rexglue-sdk` tracks
-[furqanagwan/rexglue-sdk@fixes](https://github.com/furqanagwan/rexglue-sdk/tree/fixes):
-
-- codegen: `vpkuwus`/`vpkuhus` read aliased sources before writing (VP6 video colour)
-- input: `InputSystem` entry points are serialized (concurrent polling crash)
-- gpu/d3d12: issued draws feed the debug overlay counter
-- kernel: 64-bit export arguments (XUIDs, file times) are no longer truncated,
-  which broke NBA LIVE 10 profile saves
-- platform: a UWP build (`REXGLUE_PLATFORM_UWP`) for Xbox Developer Mode
-- system: repeated export lookups reuse their thunk (upstream #420)
-- filesystem: relative guest paths resolve against `game:` (upstream #405)
-- upstream PRs #422, #423, #424 (Windows clone and install build fixes),
-  #384 (config loaded before path settings) and #382 (host FP exceptions stay masked)
-
-## Legal
-
-Not affiliated with or endorsed by Electronic Arts or Microsoft. NBA LIVE is a
-trademark of Electronic Arts. You must own the game; no copyrighted game content
-is distributed here.
+Not affiliated with or endorsed by Electronic Arts or Microsoft. NBA LIVE and
+EA SPORTS are trademarks of Electronic Arts. Releases contain code recompiled
+from the original games but no game data; you must own the game to play.

@@ -1,4 +1,3 @@
-[submodule "thirdparty/rexglue-sdk"]
-	path = thirdparty/rexglue-sdk
-	url = https://github.com/furqanagwan/rexglue-sdk.git
-	branch = fixes
+[submodule "framework"]
+	path = framework
+	url = https://github.com/furqanagwan/recomp-framework.git

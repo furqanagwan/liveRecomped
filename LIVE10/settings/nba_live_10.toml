@@ -1,5 +1,5 @@
 input_backend = "sdl"
-live_shared_controllers = true
+recomp_shared_controllers = true
 guide_button = false
 mnk_mode = false
 

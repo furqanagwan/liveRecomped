@@ -59,20 +59,45 @@ Region list from [Redump](http://redump.org/discs/system/xbox360/).
 | Xbox PC app, UWP builds | Configured, not yet tested |
 | Linux, macOS, Steam Deck | Builds expected, not play-tested |
 
-## Getting started
+## Play
 
-1. Build from the repository root:
-   `.\scripts\build.ps1 -Game LIVE10` or `./scripts/build.sh LIVE10`.
-2. Launch `NBA LIVE 10`. On first run choose your Xbox 360 ISO; the files are
-   extracted once.
+1. Download `NBALIVE10-v<version>-windows-x64.zip` from
+   [Releases](https://github.com/furqanagwan/liveRecomped/releases?q=LIVE10)
+   and extract it to a folder you can write to.
+2. Run `NBA LIVE 10.exe` and choose your Xbox 360 ISO (Europe/Asia disc, see
+   [Regions](#regions)); the files are copied once.
 3. Open the system menu with **View + Menu** (or **Esc**) for Settings and Exit.
 
 While the music issue is open, start the game with extra logging so a failure
 can be diagnosed:
 
 ```powershell
-& ".\LIVE10\out\build\win-amd64-release\NBA LIVE 10.exe" --log_level=debug
+& ".\NBA LIVE 10.exe" --log_level=debug
 ```
+
+## System requirements
+
+| | Required |
+| --- | --- |
+| OS | Windows 10 version 2004 (build 19041) or Windows 11, 64-bit |
+| Processor | 64-bit x86 CPU with SSE4.1 |
+| Graphics | DirectX 12 GPU (feature level 11_0) |
+| Memory | 8 GB RAM recommended |
+| Storage | 6.5 GB, plus room for the ISO while it is copied |
+| Software | [Microsoft Visual C++ Redistributable 2015-2022 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) |
+| Game | Your own NBA LIVE 10 (Europe, Asia) Xbox 360 disc image |
+
+Tested on an Intel Core Ultra 9 275HX, GeForce RTX 5080 Laptop GPU and 32 GB RAM
+(Windows 11).
+
+## Build from source
+
+```
+rexglue extract "<your disc>.iso" LIVE10\assets
+.\framework\scripts\build.ps1 -Game LIVE10
+```
+
+Setup is described in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Default settings
 
@@ -88,7 +113,7 @@ needs them has not been tested separately.
 | Generated sources | 570 files, about 291 MB |
 | Function seeds | 836 in `config/functions.toml` |
 | Disabled seeds | 19 in `config/disabled_function_seeds.txt` (they split real functions) |
-| Kernel stubs | Xbox Live Vision camera, shared from `common/src/kernel` |
+| Kernel stubs | Xbox Live Vision camera, shared from `framework/common/src/kernel` |
 | Known codegen warnings | 26 unhandled `vpkd3d128` float16 packs, one 1.36 MB function |
 
 The full log of what was found and fixed is in [docs/NOTES.md](docs/NOTES.md).
@@ -98,9 +123,9 @@ The full log of what was found and fixed is in [docs/NOTES.md](docs/NOTES.md).
 Same flow as NBA LIVE 09, using `uwp/AppxManifest.xml`:
 
 ```powershell
-.\scripts\build.ps1 -Game LIVE10 -Preset win-amd64-uwp-release
-.\scripts\package_uwp.ps1 -Game LIVE10 -Register
-.\scripts\package_uwp.ps1 -Game LIVE10 -Pack
+.\framework\scripts\build.ps1 -Game LIVE10 -Preset win-amd64-uwp-release
+.\framework\scripts\package_uwp.ps1 -Game LIVE10 -Register
+.\framework\scripts\package_uwp.ps1 -Game LIVE10 -Pack
 ```
 
 ## Artwork
@@ -113,7 +138,7 @@ To regenerate the exe icon and Xbox app images locally:
 2. Upscale `metadata/icons/title.png` 4x twice with Real-ESRGAN
    (`realesrgan-x4plus`) to `metadata/gdk_hd/title_1024.png`, or copy
    `docs/icon.png` there.
-3. `.\scripts\generate_artwork.ps1 -Game LIVE10 -ProjectName nba_live_10`
+3. `.\framework\scripts\generate_artwork.ps1 -Game LIVE10 -ProjectName nba_live_10`
    writes the exe icon and the Xbox app images.
 
 ## Legal

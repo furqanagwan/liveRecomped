@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(generated/rexglue.cmake)
-include(../cmake/LiveRecomp.cmake)
+include(../framework/cmake/Recomp.cmake)
 
-live_recomp_add_game(nba_live_10
+recomp_add_game(nba_live_10
     OUTPUT_NAME "NBA LIVE 10"
     SOURCES
         src/main.cpp
